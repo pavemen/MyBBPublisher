@@ -216,7 +216,7 @@
 		else
 		{
 			$albums = array();
-			if($this->settings['page'] != '' && $this->settings['page_token'] != '')
+			if($this->settings['page'] != '' && $this->settings['page_token'] != '' && $this->settings['type'] == 'photo')
 			{
 				//try to get albums
 				$fb_url = $this->api_url.'/'.$this->settings['page'].'/albums?access_token='.$this->settings['page_token'];
