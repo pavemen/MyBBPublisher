@@ -82,7 +82,7 @@ function mybbpublisher_load()
 {
     global $mybb, $lang, $cache, $usergroups, $publisher, $plugins;
 
-	if($mybb->settings['mybbpublisher_enabled']==1 && $mybb->user['uid'] == 2)
+	if($mybb->settings['mybbpublisher_enabled']==1)
 	{
 		require_once(MYBB_ROOT.'/inc/plugins/mybbpublisher/class_mybbpublisher.php');
 		$publisher = new mybbpublisher;
