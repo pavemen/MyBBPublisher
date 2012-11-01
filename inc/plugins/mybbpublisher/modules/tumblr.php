@@ -31,7 +31,7 @@
  } 
 
  global $pub_services;
- $pub_services['tumblr'] = '1.0'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
+ $pub_services['tumblr'] = '1.1'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
  
  class pub_tumblr
  {
@@ -553,7 +553,7 @@
 	 */
 	function test_post() 
 	{
-		global $mybb, $config, $db;	
+		global $mybb, $config, $db, $publisher;	
 		
 		if($mybb->input['do'] == "delete")
 		{
@@ -580,6 +580,8 @@
 				$content = array('message'=> $this->lang['test_message'],
 								'title'=>$this->lang['test_title'],
 								'link'=>$mybb->settings['bburl'],
+								'author'=>'Test User',
+								'authorlink'=>$mybb->settings['bburl'],
 								);
 			
 			}
@@ -588,7 +590,10 @@
 				$content = array('message'=> $this->lang['test_message'],
 								'title'=>$this->lang['test_title'],
 								'link'=>$mybb->settings['bburl'],
-								'imageurl'=>'http://www.communityplugins.com/forum/images/mybbpublisher_default.png'
+								'author'=>'Test User',
+								'authorlink'=>$mybb->settings['bburl'],
+								'imageurl'=>$mybb->settings['bburl'].'/images/mybbpublisher_default.png',
+								'imagepath'=>str_replace('//', '/', str_replace($mybb->settings['bburl'], MYBB_ROOT, $publisher->default_image))
 								);
 			}
 						
