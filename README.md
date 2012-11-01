@@ -1,0 +1,21 @@
+<h1>MyBB Publisher Plugin for MyBB</h1>
+<h3>Support offered at <a href="http://www.communityplugins.com/forum/forumdisplay.php?fid=5" target="_blank">Community Plugins</a></h3>
+<h3>Description</h3>
+<p>MyBBPublisher can be used to publish new threads and announcements to Twitter, Tumblr and/or Facebook. As a modular system, additional modules can be created by anyone and easily added to a live system.</p>
+<p>This plugin will publish the subject of new threads in specified forums or threads moved into the specified forums to your Twitter account, Tumblr blog and/or Facebook wall, page or group. It will also publish announcements. </p>
+<p>Status updates include links to the thread and author, description (first X characters of the post), thread/announcement subject, and the authors avatar. Users without an avatar specified will have a default avatar used.</p>
+<p>Links to the thread/announcement can be in Bit.ly or Adf.ly format depending on settings. URL shortening support is optional.</p>
+<p>**Please note** that the Bit.ly shortening service does appear to be faster than Adf.ly shortening at this time.</p>
+<p>MyBBPublisher is now usergroup aware and can be set to allow only specific usergroups to publis</p>h. This setting is checked before any significant MyBBPublisher content is loaded to maximize performance. 
+<p>Also, the admin can specify if publishig will happen automatically or provide a "Post Option" that will allow publishing On Demand.</p>
+<p>Each service has the option of posting the first image attachment (if available) to the service via upload. "Photo" status updates include the thread title and author links. For Facebook, you can specify an existing album associated with the wall, page or group you are posting to and MyBBPublisher will upload the file to that album.</p>
+<p>For Twitter, the plugin will also apply a limited number of hashtags to the end of a status update, space permitting. Hashtags are optional and are applied in order they are saved in the settings. If one hashtag does not fit in the remaining status update space, the next hashtag set is tested and applied if it fits, and so on.</p>
+<p>For Facebook, the plugin will post to your own wall or to a page you specify. If you choose to publish to a page, you can choose to post as yourself, or as the 'page'. Also appears to support posting to a group or app page.</p>
+<p>For Tumblr, the plugin will post to your blog as a "Photo" or "Link" share. Backlinks to the post are provided and for photos, a title/caption is set. </p>
+<p>The index page can also indicate which forums are published if an icon image is specified in the ACP. Only forums that guests and regular registered users can view threads in will be published, even if specified in the setting as being publishable. Forums to be published can be specified in the ACP as inclusive or exclusive. That means that you can specify what forums to publish or what forums to not publish.</p>
+<p>**Please note** that the MyBB "Can Only View Own Threads" setting can result in Private/Support forums having their content published. Verify the forums you set to make sure you do not accidentally share private information.</p>
+<p>This plugin also deletes published status updates when a thread is deleted or moved out of a published forum or when an announcement is deleted. If an announcement or thread is edited, the old status is dropped and a new status is posted at the top of your wall/list.</p>
+<h3>Compatibility</h3>
+<p>MyBB Publiher is compatible with RSS2Post and similar feed readers that post to your forums as well as with xThreads "file" type threadfields. For xThreads, MyBB Publisher will test if xThreads is on a site and search for attachments in the xThreads attachment table first, then fall back to the default MyBB attachments table if no image is found (part of version 3.1 and later). MyBBPublisher is compatible with MyBB 1.4 and 1.6</p>
+<h3>Required third party items</h3>
+<p>This plugin requires the site admin to have a Twitter, Tumblr or Facebook account/page or permissions to post to a page/group. You will need to create an 'application' in the service's developer site and authorize the plugin to access your accounts on your behalf.</p>
