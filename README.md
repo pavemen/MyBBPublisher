@@ -3,7 +3,7 @@
 <h3>Description</h3>
 <p>MyBBPublisher can be used to publish new threads and announcements to Twitter, Tumblr and/or Facebook. As a modular system, additional modules can be created by anyone and easily added to a live system.</p>
 <p>This plugin will publish the subject of new threads in specified forums or threads moved into the specified forums to your Twitter account, Tumblr blog and/or Facebook wall, page or group. It will also publish announcements. </p>
-<p>Status updates include links to the thread and author, description (first X characters of the post), thread/announcement subject, and the authors avatar. Users without an avatar specified will have a default avatar used.</p>
+<p>Status updates include links to the thread and author, description (first X characters of the post which is an available setting), thread/announcement subject, and the authors avatar. Users without an avatar specified will have a default avatar used.</p>
 <p>Links to the thread/announcement can be in Bit.ly or Adf.ly format depending on settings. URL shortening support is optional.</p>
 <p>**Please note** that the Bit.ly shortening service does appear to be faster than Adf.ly shortening at this time.</p>
 <p>MyBBPublisher is now usergroup aware and can be set to allow only specific usergroups to publis</p>h. This setting is checked before any significant MyBBPublisher content is loaded to maximize performance. 
