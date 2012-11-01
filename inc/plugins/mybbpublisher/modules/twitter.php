@@ -412,6 +412,10 @@
 	function rate_limit()
 	{
 		global $mybb, $config, $db, $publisher;
+		
+		$output .= "This feature is not currently applicable to Twitter's REST API v1.1";
+		return $output;
+		
 		if($this->settings['ckey'] != "" && $this->settings['csecret'] != "" && $this->settings['token'] != "" && $this->settings['tsecret'] != "")
 		{
 			$output = '<h3>'.$this->lang['step2_results'].'</h3>';
