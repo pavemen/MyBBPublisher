@@ -4,7 +4,7 @@
  * Copyright 2012 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.0.0
+ * Version 3.1.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  * File: <MYBB_ROOT>\inc\tasks\mybbpublisher.php
