@@ -285,7 +285,7 @@ function mybbpublisher_activate()
 	if(file_exists(MYBB_ROOT.'/inc/plugins/mybbpublisher/upgrade.php'))
 	{
 		require_once MYBB_ROOT.'/inc/plugins/mybbpublisher/upgrade.php';
-    }
+    	}
 	$retval = mybbpublisher_set_cache_version() ;
 
  	rebuild_settings();
@@ -316,7 +316,7 @@ function mybbpublisher_uninstall()
 {
 	global $mybb, $db, $cache, $plugins;
 	
-//	if($mybb->settings['mybbpublisher_uninstall_fields'] == 1)
+	if($mybb->settings['mybbpublisher_uninstall_fields'] == 1)
 	{
 		$db->write_query("ALTER TABLE ".TABLE_PREFIX."announcements DROP publish_ids");
 		$db->write_query("ALTER TABLE ".TABLE_PREFIX."threads DROP publish_ids");
@@ -329,8 +329,8 @@ function mybbpublisher_uninstall()
 	
 	rebuild_settings();
     
-    //remove version details
-    $retval = mybbpublisher_unset_cache_version() ;
+    	//remove version details
+    	$retval = mybbpublisher_unset_cache_version() ;
     
 /*---- Remove Task ---*/
 	include('../inc/functions_task.php');
