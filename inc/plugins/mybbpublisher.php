@@ -302,7 +302,7 @@ function mybbpublisher_do_newthread($mythread)
 						}
 					}
 					
-					if($content['imageurl'] != '')
+					if($content['imageurl'] == '')
 					{
 						$query = $db->simple_select("attachments", "*", "posthash='{$mythread['posthash']}' AND filetype LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
 						while($row = $db->fetch_array($query))
