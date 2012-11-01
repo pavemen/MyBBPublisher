@@ -218,15 +218,22 @@
 			$albums = array();
 			if($this->settings['page'] != '' && $this->settings['page_token'] != '')
 			{
+				//try to get albums
 				$fb_url = $this->api_url.'/'.$this->settings['page'].'/albums?access_token='.$this->settings['page_token'];
 				$fb_results = json_decode(@file_get_contents($fb_url));
-				if(count($fb_results))
+				if(isset($fb_results->error))
+				{
+					$output .= '<div style="border:1px solid #FC6;background:#FFC;color: #C00;">'.$this->lang['setting_type_photo_albums'].': '.$fb_results->error->type.': '.$fb_results->error->message.'</div><br />';
+					mybbpublisher_log($this->service_name, $fb_results);
+				}
+				else
 				{
 					foreach($fb_results->data as $key => $album)
 					{
 						$albums[$album->id] = $album->name.' ('.$album->privacy.')';
 					}
 				}
+				
 				if(count($albums))
 				{
 					$album_desc = $this->lang['setting_type_photo_upload_to'];
