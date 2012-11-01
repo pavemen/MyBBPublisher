@@ -1,7 +1,7 @@
 <?php
 /**
  * MyBBPublisher Plugin for MyBB - Plugin functions
- * Copyright 2011 CommunityPlugins.com, All Rights Reserved
+ * Copyright 2012 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
  * Version 3.1.0
@@ -275,12 +275,12 @@ function mybbpublisher_activate()
 {
 	global $db, $cache, $plugins;
     
-    //clear old error cache
-    $cache->update('mybbpublisher_errors_tw',false);
-    $cache->update('mybbpublisher_errors_fb',false);
+    	//clear old error cache
+    	$cache->update('mybbpublisher_errors_tw',false);
+    	$cache->update('mybbpublisher_errors_fb',false);
     
-    //deal with version changes on activate
-    $oldver = mybbpublisher_get_cache_version() ;
+    	//deal with version changes on activate
+    	$oldver = mybbpublisher_get_cache_version() ;
 
 	if(file_exists(MYBB_ROOT.'/inc/plugins/mybbpublisher/upgrade.php'))
 	{
@@ -519,7 +519,7 @@ function mybbpublisher_admin()
 				admin_redirect("index.php?module=tools-mybbpublisher");
 			}		
 
-	        $sub_tabs['tools'] = array('title' => $lang->mybbpublisher_tools,
+	        	$sub_tabs['tools'] = array('title' => $lang->mybbpublisher_tools,
                                   'description' => $lang->mybbpublisher_tools_desc,
                                   'link' => 'index.php?module=tools-mybbpublisher&amp;action=tools');
 
@@ -575,35 +575,38 @@ function mybbpublisher_admin()
 					}
 									
 					//create a tab for the module
-				    $sub_tabs[$service] = array('title' => $$service->lang['service_name'].' '.$status_image,
-                                  'description' => $lang->sprintf($lang->mybbpublisher_tab_desc, $$service->lang['service_name']),
-                                  'link' => 'index.php?module=tools-mybbpublisher&amp;service='.$service);
+				    	$sub_tabs[$service] = array('title' => $$service->lang['service_name'].' '.$status_image,
+                                  		'description' => $lang->sprintf($lang->mybbpublisher_tab_desc, $$service->lang['service_name']),
+                                  		'link' => 'index.php?module=tools-mybbpublisher&amp;service='.$service);
 
 					$plugins->run_hooks("mybbpublisher_admin_service_start", $$service);
 
 					//and build the ACP options for each
 					if($mybb->input['action'] != 'showlog')
 					{
-						if(count($$service->acp_actions) && $mybb->input['action'] != 'settings' && ($mybb->input['service'] == $service))
+						if($mybb->input['action'] != 'settings' && $mybb->input['service'] == $service)
 						{
-							ksort($$service->acp_actions);
 							$table = new Table;
 							$table->construct_cell('<a href="index.php?module=tools-mybbpublisher&service='.$service.'&action=settings">'.$lang->mybbpublisher_settings.'</a><br />');
 							$table->construct_row();
 							$output .= $table->output($lang->mybbpublisher_module_admin,'1','general',true);
-
-							$table = new Table;
-							foreach($$service->acp_actions as $key => $action)
-							{
-								$table->construct_cell('<a href="index.php?module=tools-mybbpublisher&service='.$service.'&action='.key($action).'">'.$action[key($action)].'</a><br />');
-								$table->construct_row();
+											
+							if(count($$service->acp_actions))
+							{	
+								ksort($$service->acp_actions);
+								$table = new Table;
+								foreach($$service->acp_actions as $key => $action)
+								{
+									$table->construct_cell('<a href="index.php?module=tools-mybbpublisher&service='.$service.'&action='.key($action).'">'.$action[key($action)].'</a><br />');
+									$table->construct_row();
+								}
+								$status_image = '<img src="'.$mybb->settings['bburl'].'/images/invalid.gif">';
+								if($$service->settings['enabled'])
+								{
+									$status_image = '<img src="'.$mybb->settings['bburl'].'/images/valid.gif">';
+								}
+								$output .= $table->output($lang->mybbpublisher_module_setup,'1','general',true);
 							}
-							$status_image = '<img src="'.$mybb->settings['bburl'].'/images/invalid.gif">';
-							if($$service->settings['enabled'])
-							{
-								$status_image = '<img src="'.$mybb->settings['bburl'].'/images/valid.gif">';
-							}
-							$output .= $table->output($lang->mybbpublisher_module_setup,'1','general',true);
 						}
 					
 						//then handle any incoming requests for the module
