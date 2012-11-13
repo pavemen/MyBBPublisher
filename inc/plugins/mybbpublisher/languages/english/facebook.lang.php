@@ -69,7 +69,7 @@ $l['setting_type_desc'] = "This is the type of post to make to Facebook when the
 $l['setting_type_link'] = "Link";
 $l['setting_type_photo'] = "Photo";
 $l['setting_type_photo_no_albums'] = "There are no albums listed for the page and account you have configured.";
-$l['setting_type_photo_no_list'] = "This setting is not available until you complete Step 3 of the setup and set Photo as the Type. Albums will be listed on the nexxt page load when all details are present.";
+$l['setting_type_photo_no_list'] = "This setting is not available until you complete Step 3 of the setup and set Photo as the Type. Albums will be listed on the next page load when all details are present.";
 $l['setting_type_photo_albums'] = "Albums";
 $l['setting_type_photo_upload_to'] = "If there is an image attachment, upload to this Facebook album: (privacy setting of the album)";
 
