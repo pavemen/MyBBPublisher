@@ -383,7 +383,7 @@
 		$this->errors = false;
 		if($id)
 		{
-			$result = @file_get_contents($this->api_url.$id.'?access_token='.$this->settings['token'].'&method=delete');
+			$result = @file_get_contents($this->api_url.$id.'?access_token='.$this->settings['page_token'].'&method=delete');
 
 			if($publisher->debug) mybbpublisher_log($this->service_name, array('action'=>'delete', 'result'=>$result));
 
