@@ -28,8 +28,8 @@ function task_mybbpublisher($task)
 	
 	$facebook_settings = $publisher->settings[$facebook->service_name];
 
-	//if expire time not set or is within 10 days
-	if($facebook_settings['expires'] == '' || ($facebook_settings['expires'] - TIME_NOW) <= (60*60*24*10))
+	//if expire time not set or is within 5 days
+	if($facebook_settings['expires'] == '' || ($facebook_settings['expires'] - TIME_NOW) <= (60*60*24*5))
 	{	
 		//exchange for long term token (possible to get same token back though)
 		$params =  array('client_id'	=> $facebook_settings['appid'],                        
@@ -47,11 +47,12 @@ function task_mybbpublisher($task)
 		$facebook->settings['token'] = $db->escape_string($fb_results2[0]);
 		if($fb_results2[1])
 		{
-			$facebook->settings['expires'] = $db->escape_string($fb_results2[1]);
+			$fb_results2[1] = $db->escape_string($fb_results2[1]);
+			$facebook->settings['expires'] = $fb_results2[1];
+			add_task_log($task, "Updated MyBBPublisher Token/Expire to: ".$fb_results2[1]);
 		}
 		$publisher->save_settings($facebook->service_name, $facebook->settings);
-		
-		add_task_log($task, "Updated MyBBPublisher Token/Expire");
+		add_task_log($task, "Updated MyBBPublisher Token/Expire - Nothing to update");
 	}
 }
 
