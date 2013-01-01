@@ -4,7 +4,7 @@
  * Copyright 2011 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.1.0
+ * Version 3.2.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  *
@@ -714,7 +714,7 @@ step upgrade from 2.0 series to 3.0 series
 
 		}
 
-		if(version_compare($oldver, '3.1.0', '<') && $oldver <> '' && $oldver <> 0)
+		if(version_compare($oldver, '3.2.0', '<') && $oldver <> '' && $oldver <> 0)
     	{
 			//nothing to do
 		}		
