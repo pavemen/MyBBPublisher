@@ -4,7 +4,7 @@
  * Copyright 2012 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.1.0
+ * Version 3.2.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  *
@@ -31,7 +31,7 @@ function mybbpublisher_info()
 		"website"	=> "http://www.communityplugins.com",
 		"author"	=> "CommunityPlugins.com",
 		"authorsite"	=> "http://www.communityplugins.com",
-		"version"	=> "3.1.0",
+		"version"	=> "3.2.0",
 		"guid" 		=> "7c8931b891567c13d1e05534ac50dd52",
 		"compatibility" => "16*"
 	);
