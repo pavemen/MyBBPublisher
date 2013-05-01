@@ -31,7 +31,7 @@
  }
 
  global $pub_services;
- $pub_services['twitter'] = '1.1'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
+ $pub_services['twitter'] = '1.3'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
 
  class pub_twitter
  {
@@ -107,6 +107,12 @@
 			{
 				$this->settings['type'] = $params['type'];
 			}
+
+			if(array_key_exists('forums', $params))
+			{
+				$this->settings['forums'] = $params['forums'];
+			}
+
 		}
 		$publisher->load_lang($this->service_name, $this->lang);
 		if(defined('IN_ADMINCP'))
@@ -169,6 +175,7 @@
 
 		if($mybb->request_method == 'post')
 		{
+			array_walk($mybb->input['forums'], 'intval');
 			$this->settings['enabled'] = $db->escape_string($mybb->input['enabled']);
 			$this->settings['ckey'] = $db->escape_string($mybb->input['ckey']);
 			$this->settings['csecret'] = $db->escape_string($mybb->input['csecret']);
@@ -177,6 +184,7 @@
 			$this->settings['type'] = $db->escape_string($mybb->input['type']);
 			$this->settings['icon'] = $db->escape_string(str_replace("\\", "/", $mybb->input['icon']));
 			$this->settings['tags'] = $db->escape_string($mybb->input['tags']);
+			$this->settings['forums'] = $mybb->input['forums'];
 
 			$publisher->save_settings($this->service_name, $this->settings);
 
@@ -207,6 +215,7 @@
 			$form_container->output_row($this->lang['setting_token'], $this->lang['setting_token_desc'], $form->generate_text_box('token', $this->settings['token'], array('id' => 'token')), 'token');
 			$form_container->output_row($this->lang['setting_tsecret'], $this->lang['setting_tsecret_desc'], $form->generate_text_box('tsecret', $this->settings['tsecret'], array('id' => 'tsecret')), 'tsecret');
 			$form_container->output_row($this->lang['setting_icon'], $this->lang['setting_icon_desc'], $form->generate_text_box('icon', $this->settings['icon'], array('id' => 'icon')), 'icon');
+			$form_container->output_row($this->lang['setting_forums'], $this->lang['setting_forums_desc'], $form->generate_forum_select('forums[]', $this->settings['forums'], array('multiple'=>1, 'size'=>'15')));
 
 			//make sure you pass $returnable as TRUE
 			$output .= $form_container->end(true);
@@ -547,6 +556,7 @@
 			$output = '<h3>'.$this->lang['step4_result'].'</h3>';
 
 			$content = array('title'=> $this->lang['test_message'],
+							'link' 	=> $mybb->settings['bburl']
 							);
 
 			$content['id'] = 1; //test TID

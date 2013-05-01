@@ -80,4 +80,7 @@ $l['setting_type_photo'] = "Photo";
 $l['setting_tags'] = "Hash tags to add to each post.";
 $l['setting_tags_desc'] = "A CSV list of tags (no hash) to include with all posts.";
 
+$l['setting_forums'] = "Forums to publish.";
+$l['setting_forums_desc'] = "Select forums to publish. Selected categories are ignored.";
+
 ?>

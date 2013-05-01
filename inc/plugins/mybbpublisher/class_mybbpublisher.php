@@ -1,10 +1,10 @@
 <?php
 /**
  * MyBBPublisher Plugin for MyBB
- * Copyright 2011 CommunityPlugins.com, All Rights Reserved
+ * Copyright 2013 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.2.0
+ * Version 3.4.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  *
@@ -73,10 +73,9 @@ class mybbpublisher
 		{
 			if($this->settings[$service]['enabled'] && $this->settings[$service]['icon'] != '' && file_exists(MYBB_ROOT.$this->settings[$service]['icon']))
 			{
-				$this->forum_icons .= '<img src="'.$mybb->settings['bburl'].'/'.$this->settings[$service]['icon'].'" title="'.ucfirst($service).'" alt="'.ucfirst($service).'"/> '.$forum['description'];
+				$this->forum_icons[$service] = '<img src="'.$mybb->settings['bburl'].'/'.$this->settings[$service]['icon'].'" title="'.ucfirst($service).'" alt="'.ucfirst($service).'"/> '.$forum['description'];
 			}	
 		}
-
 	}
 	
 	/**
@@ -147,6 +146,21 @@ class mybbpublisher
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 		//curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+		$result = curl_exec($ch);
+		curl_close ($ch);
+		return $result;
+	}
+	
+	/**
+	 * Simple cURL function to replace file_get_contents
+	 * 
+	 * @return string
+	 */
+	function curl_simple($url)
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$result = curl_exec($ch);
 		curl_close ($ch);
 		return $result;

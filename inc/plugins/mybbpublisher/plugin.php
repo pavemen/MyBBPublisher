@@ -1,10 +1,10 @@
 <?php
 /**
  * MyBBPublisher Plugin for MyBB - Plugin functions
- * Copyright 2012 CommunityPlugins.com, All Rights Reserved
+ * Copyright 2013 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.2.0
+ * Version 3.4.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  *
@@ -31,7 +31,7 @@ function mybbpublisher_info()
 		"website"	=> "http://www.communityplugins.com",
 		"author"	=> "CommunityPlugins.com",
 		"authorsite"	=> "http://www.communityplugins.com",
-		"version"	=> "3.2.0",
+		"version"	=> "3.4.0",
 		"guid" 		=> "7c8931b891567c13d1e05534ac50dd52",
 		"compatibility" => "16*"
 	);
@@ -100,16 +100,6 @@ function mybbpublisher_install()
 		"gid"		=> $gid
 	);
 		
-	$pluginsetting[] = array(
-		"name"		=> "mybbpublisher_forums",
-		"title"		=> "Forums in which New Threads and Announcements are published",
-		"description"	=> "This is a CSV list of FIDs to publish or not to publish based on setting above. Global announcements ignore this setting. (\'0\' or blank means everything).<br /><font style=\"color:red;\">Use caution as to avoid adding Private forums or forums with special View Own Thread permissions!</font>",
-		"optionscode"	=> "text",
-		"value"		=> "0",
-		"disporder"	=> ++$disporder,
-		"gid"		=> $gid
-	);
-	
 	$pluginsetting[] = array(
 		"name"		=> "mybbpublisher_max_chars",
 		"title"		=> "Maximum characters of message contents for previews.",
@@ -275,17 +265,14 @@ function mybbpublisher_activate()
 {
 	global $db, $cache, $plugins;
     
-    	//clear old error cache
-    	$cache->update('mybbpublisher_errors_tw',false);
-    	$cache->update('mybbpublisher_errors_fb',false);
-    
-    	//deal with version changes on activate
-    	$oldver = mybbpublisher_get_cache_version() ;
+    //deal with version changes on activate
+    $oldver = mybbpublisher_get_cache_version() ;
 
 	if(file_exists(MYBB_ROOT.'/inc/plugins/mybbpublisher/upgrade.php'))
 	{
 		require_once MYBB_ROOT.'/inc/plugins/mybbpublisher/upgrade.php';
-    	}
+    }
+
 	$retval = mybbpublisher_set_cache_version() ;
 
  	rebuild_settings();

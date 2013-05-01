@@ -1,7 +1,7 @@
 <?php
 /**
  * Facebook Module for MyBBPublisher Plugin for MyBB
- * Copyright 2012 CommunityPlugins.com, All Rights Reserved
+ * Copyright 2013 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
@@ -31,12 +31,10 @@
  }
 
  global $pub_services;
- $pub_services['facebook'] = '1.2'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
-
+ $pub_services['facebook'] = '1.4'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
 
  class pub_facebook
  {
-
 	/**
 	 * The simple service name (lowercase, no spaces, no punctuation)
 	 * @var string
@@ -135,6 +133,11 @@
 			{
 				$this->settings['type'] = $params['type'];
 			}
+
+			if(array_key_exists('forums', $params))
+			{
+				$this->settings['forums'] = $params['forums'];
+			}
 		}
 
 		$publisher->load_lang($this->service_name, $this->lang);
@@ -201,12 +204,14 @@
 
 		if($mybb->request_method == 'post')
 		{
+			array_walk($mybb->input['forums'], 'intval');
 			$this->settings['enabled'] = $db->escape_string($mybb->input['enabled']);
 			$this->settings['appid'] = trim($db->escape_string($mybb->input['appid']));
 			$this->settings['secret'] = trim($db->escape_string($mybb->input['secret']));
 			$this->settings['album_id'] = $db->escape_string($mybb->input['album_id']);
 			$this->settings['type'] = $db->escape_string($mybb->input['type']);
 			$this->settings['icon'] = $db->escape_string(str_replace("\\", "/", $mybb->input['icon']));
+			$this->settings['forums'] = $mybb->input['forums'];
 
 			$publisher->save_settings($this->service_name, $this->settings);
 
@@ -220,7 +225,8 @@
 			{
 				//try to get albums
 				$fb_url = $this->api_url.'/'.$this->settings['page'].'/albums?access_token='.$this->settings['page_token'];
-				$fb_results = json_decode(@file_get_contents($fb_url));
+				$fb_results = json_decode($publisher->curl_simple($fb_url));
+
 				if(isset($fb_results->error))
 				{
 					$output .= '<div style="border:1px solid #FC6;background:#FFC;color: #C00;">'.$this->lang['setting_type_photo_albums'].': '.$fb_results->error->type.': '.$fb_results->error->message.'</div><br />';
@@ -275,6 +281,7 @@
 			}
 
 			$form_container->output_row($this->lang['setting_icon'], $this->lang['setting_icon_desc'], $form->generate_text_box('icon', $this->settings['icon'], array('id' => 'icon')), 'icon');
+			$form_container->output_row($this->lang['setting_forums'], $this->lang['setting_forums_desc'], $form->generate_forum_select('forums[]', $this->settings['forums'], array('multiple'=>1, 'size'=>'15')));
 
 			//make sure you pass $returnable as TRUE
 			$output .= $form_container->end(true);
@@ -380,11 +387,13 @@
 	 */
 	function delete_post($id=0)
 	{
+		global $publisher;
+
 		$this->errors = false;
 		if($id)
 		{
-			$result = @file_get_contents($this->api_url.$id.'?access_token='.$this->settings['page_token'].'&method=delete');
-
+			$result = $publisher->curl_simple($this->api_url.$id.'?access_token='.$this->settings['page_token'].'&method=delete');
+			
 			if($publisher->debug) mybbpublisher_log($this->service_name, array('action'=>'delete', 'result'=>$result));
 
 			if($result != "true")
@@ -408,11 +417,13 @@
 	 */
 	function verify_app_id()
 	{
+		global $publisher;
+
 		$output = '<h3>'.$this->lang['step1_results'].'</h3>';
 		if($this->settings['appid'] != "")
 		{
 			$output .= $this->lang['appid_check'].'<br /><br />';
-			$fb_results = json_decode(@file_get_contents($this->api_url.$this->settings['appid']));
+			$fb_results = json_decode($publisher->curl_simple($this->api_url.$this->settings['appid']));
 
 			$output .= 'Name: '.$fb_results->name.'<br />';
 			$output .= 'Description: '.$fb_results->description.'<br />';
@@ -433,6 +444,7 @@
 	function verify_creds()
 	{
 		global $mybb, $config, $db, $publisher;
+
 		if($this->settings['appid'] != "" && $this->settings['secret'] != "")
 		{
 			//put this here since both calls to the redirect_uri must be equal or code verification fails
@@ -565,13 +577,13 @@
 				$fb_url = $this->api_url.'me?access_token='.$this->settings['token'];
 
 				//since we have code, get access token
-				$fb_me = json_decode(@file_get_contents($fb_url));
+				$fb_me = json_decode($publisher->curl_simple($fb_url));
 
 				$next_url = $mybb->settings['bburl'].'/'.$config['admin_dir'].'/index.php?module=tools-mybbpublisher&service='.$this->service_name.'&action=verify_page&step=2';
 
 				//get accounts
 				$fb_url = $this->api_url.'/me/accounts?access_token='.$this->settings['token'];
-				$fb_results = json_decode(@file_get_contents($fb_url));
+				$fb_results = json_decode($publisher->curl_simple($fb_url));
 
 				if(is_array($fb_results->data))
 				{
@@ -594,7 +606,7 @@
 
 				//get groups
 				$fb_url = $this->api_url.'/me/groups?access_token='.$this->settings['token'];
-				$fb_results = json_decode(@file_get_contents($fb_url));
+				$fb_results = json_decode($publisher->curl_simple($fb_url));
 
 				if(is_array($fb_results->data))
 				{

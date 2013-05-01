@@ -1,10 +1,10 @@
 <?php
 /**
  * MyBBPublisher Plugin for MyBB
- * Copyright 2011 CommunityPlugins.com, All Rights Reserved
+ * Copyright 2013 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.2.0
+ * Version 3.4.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  *
@@ -31,46 +31,55 @@ Core plugin functions
 //add icon to forum description
 $plugins->add_hook("build_forumbits_forum", "mybbpublisher_addicon");
 
+//load hooks only when needed
+$plugins->add_hook("global_end", "mybbpublisher_prepare");
+
+
 //only apply the hooks when user in a group that can publish
-$allowed = $intersected = array();
-if($mybb->settings['mybbpublisher_allowed_groups'])
+function mybbpublisher_prepare()
 {
-	$allowed = explode(',', $mybb->settings['mybbpublisher_allowed_groups']);
-	$usergroups = explode(',', $mybb->user['usergroup'].','.$mybb->user['additionalgroups']);
-	$intersected = array_intersect($allowed, $usergroups);
-}
+	global $mybb, $plugins;
+	
+	$allowed = $intersected = array();
+	if($mybb->settings['mybbpublisher_allowed_groups'])
+	{
+		$allowed = explode(',', $mybb->settings['mybbpublisher_allowed_groups']);
+		$usergroups = explode(',', $mybb->user['usergroup'].','.$mybb->user['additionalgroups']);
+		$intersected = array_intersect($allowed, $usergroups);
+	}
 
-if(count($intersected) || $mybb->settings['mybbpublisher_allowed_groups'] == '0' || $mybb->settings['mybbpublisher_allowed_groups'] == "")
-{
-	//make option
-	$plugins->add_hook("newthread_start", "mybbpublisher_make_option");
+	if(count($intersected) || $mybb->settings['mybbpublisher_allowed_groups'] == '0' || $mybb->settings['mybbpublisher_allowed_groups'] == "")
+	{
+		//make option
+		$plugins->add_hook("newthread_start", "mybbpublisher_make_option");
 
-	//handle new threads generated via post datahandler
-	$plugins->add_hook("datahandler_post_insert_thread_post", "mybbpublisher_newthread",50);
+		//handle new threads generated via post datahandler
+		$plugins->add_hook("newthread_do_newthread_end", "mybbpublisher_newthread",50);
 
-	//handle deleted threads
-	$plugins->add_hook("class_moderation_delete_thread_start", "mybbpublisher_delthread");
+		//handle deleted threads
+		$plugins->add_hook("class_moderation_delete_thread_start", "mybbpublisher_delthread");
 
-	//handle editted threads
-	$plugins->add_hook("datahandler_post_update_thread", "mybbpublisher_editthread",50);
+		//handle editted threads
+		$plugins->add_hook("datahandler_post_update_thread", "mybbpublisher_editthread",50);
 
-	//handle moved threads (move single, move multiple, w/ and w/o redirects
-	$plugins->add_hook("class_moderation_move_thread_redirect", "mybbpublisher_onmove");
-	$plugins->add_hook("class_moderation_move_simple", "mybbpublisher_onmove");
-	$plugins->add_hook("class_moderation_move_threads", "mybbpublisher_onmove");
+		//handle moved threads (move single, move multiple, w/ and w/o redirects
+		$plugins->add_hook("class_moderation_move_thread_redirect", "mybbpublisher_onmove");
+		$plugins->add_hook("class_moderation_move_simple", "mybbpublisher_onmove");
+		$plugins->add_hook("class_moderation_move_threads", "mybbpublisher_onmove");
 
-	//handle thread moderation (approval only)
-	$plugins->add_hook("class_moderation_approve_threads", "mybbpublisher_approvethreads");
+		//handle thread moderation (approval only)
+		$plugins->add_hook("class_moderation_approve_threads", "mybbpublisher_approvethreads");
 
-	//handle announcements from ACP
-	$plugins->add_hook("admin_forum_announcements_add_commit", "mybbpublisher_newannounce");
-	$plugins->add_hook("admin_forum_announcements_edit_commit", "mybbpublisher_newannounce");
-	$plugins->add_hook("admin_forum_announcements_delete", "mybbpublisher_delannounce"); //can use same as from ModCP
+		//handle announcements from ACP
+		$plugins->add_hook("admin_forum_announcements_add_commit", "mybbpublisher_newannounce");
+		$plugins->add_hook("admin_forum_announcements_edit_commit", "mybbpublisher_newannounce");
+		$plugins->add_hook("admin_forum_announcements_delete", "mybbpublisher_delannounce"); //can use same as from ModCP
 
-	//handle announcements from ModCP
-	$plugins->add_hook("modcp_do_new_announcement_end", "mybbpublisher_onmodannounce");
-	$plugins->add_hook("modcp_do_edit_announcement_end", "mybbpublisher_onmodannounce");
-	$plugins->add_hook("modcp_do_delete_announcement", "mybbpublisher_delannounce"); //can use same as from ACP
+		//handle announcements from ModCP
+		$plugins->add_hook("modcp_do_new_announcement_end", "mybbpublisher_onmodannounce");
+		$plugins->add_hook("modcp_do_edit_announcement_end", "mybbpublisher_onmodannounce");
+		$plugins->add_hook("modcp_do_delete_announcement", "mybbpublisher_delannounce"); //can use same as from ACP
+	}
 }
 
 
@@ -80,46 +89,65 @@ if(count($intersected) || $mybb->settings['mybbpublisher_allowed_groups'] == '0'
  */
 function mybbpublisher_load() 
 {
-    global $mybb, $lang, $cache, $usergroups, $publisher, $plugins;
+    global $mybb, $lang, $cache, $usergroups, $publisher;
 
 	if($mybb->settings['mybbpublisher_enabled']==1)
 	{
 		require_once(MYBB_ROOT.'/inc/plugins/mybbpublisher/class_mybbpublisher.php');
 		$publisher = new mybbpublisher;
 		
-		$forums2send = explode(",", $mybb->settings['mybbpublisher_forums']);
 		$groupperms = usergroup_permissions('1,2');
 		$forumcache = $cache->read('forums');
-		
+
 		$forums_can_publish = array();
+		$forum_icons = array();
 		foreach($forumcache as $fid => $forum)
 		{
+			//only if not a category and is active, open and not PW protected
 			if($forum['type'] == 'f' && $forum['open'] == 1 && $forum['active'] == 1 && $forum['password'] == '')
 			{
+				//only if the forum is available to guests and registered
 				$forumpermissions = fetch_forum_permissions($fid, '1,2', $groupperms);
 				if($forumpermissions['canview'] == 1 && $forumpermissions['canviewthreads'] == 1)
 				{
-					if($mybb->settings['mybbpublisher_forums'] != "0" && $mybb->settings['mybbpublisher_forums'] != "")
+					foreach($publisher->settings as $service => $service_settings)
 					{
-						if((in_array($fid, $forums2send) && $mybb->settings['mybbpublisher_how'] == 'include') || (!in_array($fid, $forums2send) && $mybb->settings['mybbpublisher_how'] == 'exclude'))
+						//only if enabled
+						if($service_settings['enabled'])
 						{
-							$forums_can_publish[] = $fid;
-						}
-					}
-					else
-					{
-						if($mybb->settings['mybbpublisher_how'] == 'include')
-						{
-							$forums_can_publish[] = $fid;
+							if(count($service_settings['forums']) > 0 && $service_settings['forums'][0] != "" && $service_settings['forums'][0] != 0)
+							{
+								if((in_array($fid, $service_settings['forums']) && $mybb->settings['mybbpublisher_how'] == 'include') || (!in_array($fid, $service_settings['forums']) && $mybb->settings['mybbpublisher_how'] == 'exclude'))
+								{
+									$forums_can_publish[$fid][] = $service;
+									if($service_settings['icon'] != '' && file_exists(MYBB_ROOT.$service_settings['icon']))
+									{
+										$forum_icons[$fid] .= '<img src="'.$mybb->settings['bburl'].'/'.$service_settings['icon'].'" title="'.ucfirst($service).'" alt="'.ucfirst($service).'"/> ';
+									}
+								}
+							}
+							else
+							{
+								if($mybb->settings['mybbpublisher_how'] == 'include')
+								{
+									$forums_can_publish[$fid][] = $service;
+									if($service_settings['icon'] != '' && file_exists(MYBB_ROOT.$service_settings['icon']))
+									{
+										$forum_icons[$fid] .= '<img src="'.$mybb->settings['bburl'].'/'.$service_settings['icon'].'" title="'.ucfirst($service).'" alt="'.ucfirst($service).'"/> ';
+									}
+								}
+							}
 						}
 					}
 				}
 			}
 		}
-		
 		$publisher->forums_can_publish = $forums_can_publish;
+		$publisher->forum_icons = $forum_icons;
 	}
 }
+
+
 
 /**
  * Adds icon to specified forums
@@ -136,9 +164,9 @@ function mybbpublisher_addicon(&$forum)
 	
 	if(is_object($publisher))
 	{
-		if(in_array($forum['fid'], $publisher->forums_can_publish))
+		if(array_key_exists($forum['fid'], $publisher->forum_icons))
 		{
-			$forum['description'] = $publisher->forum_icons.$forum['description'];
+			$forum['description'] = $publisher->forum_icons[$forum['fid']].$forum['description'];
 		}
 	}
 	
@@ -235,13 +263,14 @@ function mybbpublisher_get_url($url='')
  * Process new threads for publishing (from hook)
  * @var array Thread contents
  */
-function mybbpublisher_newthread(&$threadbyref) 
+function mybbpublisher_newthread()
 {
-	global $mybb;
+	global $mybb, $thread_info;
 
 	if(($mybb->input['postoptions']['publish'] == 1 && $mybb->settings['mybbpublisher_method'] == 'ondemand') || $mybb->settings['mybbpublisher_method'] == 'always')
 	{
-		mybbpublisher_do_newthread($threadbyref->post_insert_data);
+		$mythread = get_post($thread_info['pid']);
+		mybbpublisher_do_newthread($mythread);
 	}
 }
 
@@ -269,32 +298,33 @@ function mybbpublisher_do_newthread($mythread)
 				$mythread['tid'] = (int)$thread['tid'];
 				$mythread['fid'] = (int)$thread['fid'];
 			}
-		
-			if(in_array($mythread['fid'], $publisher->forums_can_publish))
-			{
-				$content = array();
-		
-				$user = mybbpublisher_get_user($mythread['uid']);
 
-				//load basics	
-				$content = array();
-				$content['title'] = strip_tags($mythread['subject']);
-				$content['message'] = substr(strip_tags($mythread['message']), 0, $mybb->settings['mybbpublisher_max_chars']);
-				$content['link'] = $mybb->settings['bburl'] ."/" . get_thread_link($mythread['tid']);
-				$content['shortlink'] = mybbpublisher_get_url($content['link']);
-				$content['author'] = $user['username'];
-				$content['avatar'] = $user['avatar'];
-				$content['authorlink'] = $mybb->settings['bburl'] ."/" . get_profile_link($mythread['uid']);
-	
-				//check if we have an image attachment and load content if we do
-				if($mythread['posthash'])
+			if(array_key_exists($mythread['fid'], $publisher->forums_can_publish))
+			{
+				if(count($publisher->forums_can_publish[$mythread['fid']]))
 				{
-					$mythread['posthash'] = $db->escape_string($mythread['posthash']);
+					$content = array();
+			
+					$user = mybbpublisher_get_user($mythread['uid']);
+
+					//load basics	
+					$content = array();
+					$content['title'] = strip_tags($mythread['subject']);
+					$content['message'] = preg_replace('/\[.+?\]/','',$mythread['message']); //remove mycode, but it impacts other bracketed text but this is fastest and that is rare situation
+					$content['message'] = substr(strip_tags($content['message']), 0, $mybb->settings['mybbpublisher_max_chars']);
+					$content['link'] = $mybb->settings['bburl'] ."/" . get_thread_link($mythread['tid']);
+					$content['shortlink'] = mybbpublisher_get_url($content['link']);
+					$content['author'] = $user['username'];
+					$content['avatar'] = $user['avatar'];
+					$content['authorlink'] = $mybb->settings['bburl'] ."/" . get_profile_link($mythread['uid']);
+		
+					//check if we have an image attachment and load content if we do
 					
 					//support for xthreads attachments
 					if(defined('XTHREADS_VERSION'))
 					{
-						$query = $db->simple_select("xtattachments", "*", "posthash='{$mythread['posthash']}' AND uploadmime LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
+						//$query = $db->simple_select("xtattachments", "*", "posthash='{$mythread['posthash']}' AND uploadmime LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
+						$query = $db->simple_select("xtattachments", "*", "tid='{$mythread['tid']}' AND uploadmime LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
 						while($row = $db->fetch_array($query))
 						{
 							$content['imageurl'] = $mybb->settings['bburl'].'/'.str_replace('./', '', $mybb->settings['uploadspath']).'/xthreads_ul/'.$row['indir'].'/file_'.$row['aid'].'_'.$row['attachname'];
@@ -304,40 +334,41 @@ function mybbpublisher_do_newthread($mythread)
 					
 					if($content['imageurl'] == '')
 					{
-						$query = $db->simple_select("attachments", "*", "posthash='{$mythread['posthash']}' AND filetype LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
+						//$query = $db->simple_select("attachments", "*", "posthash='{$mythread['posthash']}' AND filetype LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
+						$query = $db->simple_select("attachments", "*", "pid='{$mythread['pid']}' AND filetype LIKE 'image%'", array("order_by" => "aid", "limit"=>1));
 						while($row = $db->fetch_array($query))
 						{
 							$content['imageurl'] = $mybb->settings['bburl'].'/'.str_replace('./', '', $mybb->settings['uploadspath']).'/'.$row['attachname'];
 							$content['imagepath'] = MYBB_ROOT.'/'.str_replace('./', '', $mybb->settings['uploadspath']).'/'.$row['attachname'];
 						}
 					}
-				}
 
-				$result = array();
-			
-				//run through enabled modules and post content
-				foreach($publisher->services as $service => $version)
-				{
-					//if the service is enabled
-					if($publisher->settings[$service]['enabled'])
+					$result = array();
+				
+					//run through enabled modules and post content
+					foreach($publisher->forums_can_publish[$mythread['fid']] as $service)
 					{
-						//create new class object for it
-						$classname = 'pub_'.$service;
-						if(!is_object($$service))
+						//if the service is enabled
+						if($publisher->settings[$service]['enabled'])
 						{
-							global $$service;
-							$$service = new $classname;
+							//create new class object for it
+							$classname = 'pub_'.$service;
+							if(!is_object($$service))
+							{
+								global $$service;
+								$$service = new $classname;
+							}
+
+							//and post the content
+							$result[$service] = $$service->do_post($content);
 						}
-
-						//and post the content
-						$result[$service] = $$service->do_post($content);
 					}
-				}
 
-				//store ids so we can edit/delete updates later
-				if(count($result))
-				{
-					$db->update_query('threads', array('publish_ids'=>serialize($result)), 'tid='.$mythread['tid']);
+					//store ids so we can edit/delete updates later
+					if(count($result))
+					{
+						$db->update_query('threads', array('publish_ids'=>serialize($result)), 'tid='.$mythread['tid']);
+					}
 				}
 			}
 		}
@@ -430,17 +461,6 @@ function mybbpublisher_editthread(&$threadbyref)
 			//remove any old updates
 			mybbpublisher_do_delete($mythread);
 			$mythread['publish_ids'] = '';
-	
-			//get the posthash of the first post in the thread so we can grab attachments
-			$options = array(
-				"order_by" => "dateline",
-				"order_dir" => "asc",
-				"limit_start" => 0,
-				"limit" => 1
-			);
-			$query = $db->simple_select("posts", "posthash", "tid='".$mythread['tid']."'", $options);
-			$first_post_hash = $db->fetch_array($query);
-			$mythread['posthash'] = $first_post_hash['posthash'];
 	
 			//finally publish updates for new thread content
 			mybbpublisher_do_newthread($mythread);
@@ -597,7 +617,7 @@ function mybbpublisher_do_newannounce($myannounce)
 		
 		if(is_object($publisher))
 		{
-			if(in_array($myannounce['fid'], $publisher->forums_can_publish) || $myannounce['fid'] == -1)
+			if(array_key_exists($myannounce['fid'], $publisher->forums_can_publish) || $myannounce['fid'] == -1)
 			{
 				$content = array();
 	
@@ -615,7 +635,7 @@ function mybbpublisher_do_newannounce($myannounce)
 				$result = array();
 		
 				//run through enabled modules and post content
-				foreach($publisher->services as $service => $version)
+				foreach($publisher->forums_can_publish[$myannounce['fid']] as $service)
 				{
 					//if the service is enabled
 					if($publisher->settings[$service]['enabled'])
@@ -737,9 +757,12 @@ function mybbpublisher_log($service, $message, $overwrite=false)
 	
 	//get string rep of the mesage, wahtever the contents	
 	ob_start();
+//	echo '<pre>';
+//	print_r($message,true);
+//	echo '</pre>';
 	var_dump($message);
 	$message = ob_get_clean();
-	
+
 	//add to existing if we keep it
 	$contents .= '<blockquote>'.$message.'</blockquote>';
 	

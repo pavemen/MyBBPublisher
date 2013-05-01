@@ -91,4 +91,7 @@ $l['setting_state_draft'] = "Draft";
 $l['setting_state_queue'] = "Queue";
 $l['setting_state_private'] = "Private";
 
+$l['setting_forums'] = "Forums to publish.";
+$l['setting_forums_desc'] = "Select forums to publish. Selected categories are ignored.";
+
 ?>

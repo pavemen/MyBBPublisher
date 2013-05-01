@@ -25,6 +25,14 @@
  *
  * @package    bitly
  */
+
+/**
+ * This file has been modifed by http://www.communityplugins.com
+ * in order to get around the requirement for file_get_contents()
+ * and uses a cimple cURL function instead
+ *
+ */
+
 class bitly{
 
 	/**
@@ -252,9 +260,11 @@ class bitly{
 		}
 
 		if ( $this->format == 'json' ) {
-			$results = json_decode(file_get_contents($bitlyurl), true);
+			//$results = json_decode(file_get_contents($bitlyurl), true);
+			$results = json_decode($this->curl_simple($bitlyurl), true);
 		} else if ( $this->format == 'xml' ) {
-			$xml = file_get_contents($bitlyurl);
+			//$xml = file_get_contents($bitlyurl);
+			$xml = $this->curl-simple($bitlyurl);
 			$results = $this->XML2Array($xml);
 		}
 
@@ -305,4 +315,23 @@ class bitly{
 		}
 		return $newArray;
 	}
+
+	/**
+	 * Simple cURL function to replace file_get_contents
+	 * http://www.communityplugins.com
+	 * 
+	 * @return string
+	 */
+	function curl_simple($url)
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$result = curl_exec($ch);
+		curl_close ($ch);
+		return $result;
+	}
+	
 }
+
+?>

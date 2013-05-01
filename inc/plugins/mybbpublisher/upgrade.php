@@ -1,10 +1,10 @@
 <?php
 /**
  * MyBBPublisher Plugin for MyBB - Plugin upgrade file
- * Copyright 2011 CommunityPlugins.com, All Rights Reserved
+ * Copyright 2013 CommunityPlugins.com, All Rights Reserved
  *
  * Website: http://www.communityplugins.com
- * Version 3.2.0
+ * Version 3.4.0
  * License: Creative Commons Attribution-NonCommerical ShareAlike 3.0
 				http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
  *
@@ -714,8 +714,50 @@ step upgrade from 2.0 series to 3.0 series
 
 		}
 
-		if(version_compare($oldver, '3.2.0', '<') && $oldver <> '' && $oldver <> 0)
+		if(version_compare($oldver, '3.4.0', '<') && $oldver <> '' && $oldver <> 0)
     	{
-			//nothing to do
+			//migrate forums to publish from global settings to module settings
+			$modulesettings = unserialize($mybb->settings['mybbpublisher_module_settings']);
+			$mybbpublisher_forums = explode(',', $mybb->settings['mybbpublisher_forums']);
+			$mybbpublisher_forums = array_walk($mybbpublisher_forums, 'intval');
+			
+			foreach($modulesettings as $service => $settings)
+			{
+				$settings['forums'] = 0;
+				if($settings['enabled'] == '1')
+				{
+					$settings['forums'] = $mybbpublisher_forums;
+				}
+				$modulesettings[$service] = $settings;
+			}
+
+			//update with new module settings
+			$settingchange = array(
+				"value"		=> serialize($modulesettings)
+			);
+			$db->update_query("settings", $settingchange, "name='mybbpublisher_module_settings'");
+
+			//remove deprecated
+			$db->delete_query("settings", "name in ('mybbpublisher_forums')");
+
+			//clear old error cache, was in _activate and was adding the items if they did not exist before. this gets rid of it permanently
+			if($cache->read('mybbpublisher_errors_tw'))
+			{
+				if(is_object($cache->handler) || is_object($cache->cachehandler))
+				{
+		    		$cache->delete('mybbpublisher_errors_tw');
+		    	}
+				$db->delete_query('datacache', 'name="mybbpublisher_errors_tw"');
+	    	}
+
+			if($cache->read('mybbpublisher_errors_fb'))
+			{
+				if(is_object($cache->handler) || is_object($cache->cachehandler))
+				{
+		    		$cache->delete('mybbpublisher_errors_fb');
+		    	}
+				$db->delete_query('datacache', 'name="mybbpublisher_errors_fb"');
+	    	}
+
 		}		
 ?>

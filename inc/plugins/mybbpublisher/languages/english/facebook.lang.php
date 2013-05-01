@@ -76,4 +76,7 @@ $l['setting_type_photo_upload_to'] = "If there is an image attachment, upload to
 $l['setting_icon'] = "Path to Facebook icon";
 $l['setting_icon_desc'] = "Relative path to Facebook icon used to identify those forums to be published. Leave blank to disable.";
 
+$l['setting_forums'] = "Forums to publish.";
+$l['setting_forums_desc'] = "Select forums to publish. Selected categories are ignored.";
+
 ?>
