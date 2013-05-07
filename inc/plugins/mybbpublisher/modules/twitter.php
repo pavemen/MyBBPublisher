@@ -31,7 +31,7 @@
  }
 
  global $pub_services;
- $pub_services['twitter'] = '1.3'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
+ $pub_services['twitter'] = '1.4'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
 
  class pub_twitter
  {
@@ -278,13 +278,16 @@
 				$status .= $this->lang['at'].($content['shortlink'] ? $content['shortlink'] : $content['link']);
 
 				//apply hash tags if we have leftover space for the status, attempt to add them all from left to right adding whatever fits
-				$tags = explode(',', $this->settings['tags']);
-				foreach($tags as $tag)
+				if(trim($this->settings['tags']) != '')
 				{
-					$tag = trim($tag);
-					if(strlen($status) + strlen($tag) + 2 <= 140)
+					$tags = explode(',', trim($this->settings['tags']));
+					foreach($tags as $tag)
 					{
-						$status .= ' #'.$tag;
+						$tag = trim($tag);
+						if(strlen($status) + strlen($tag) + 2 <= 140)
+						{
+							$status .= ' #'.$tag;
+						}
 					}
 				}
 
