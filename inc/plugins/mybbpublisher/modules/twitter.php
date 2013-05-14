@@ -31,7 +31,7 @@
  }
 
  global $pub_services;
- $pub_services['twitter'] = '1.4'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
+ $pub_services['twitter'] = '1.5'; //(lowercase, no spaces, no punctuation) must match $service_name below and base filename of this file
 
  class pub_twitter
  {
@@ -303,7 +303,7 @@
 										 'media[]' => "@{$content['imagepath']}",
 										);
 
-					$tmhOAuth->request('POST', 'https://upload.twitter.com/1.1/statuses/update_with_media.json', $attachment, true, true);
+					$tmhOAuth->request('POST', $tmhOAuth->url('1.1/statuses/update_with_media'), $attachment, true, true);
 				}
 				else
 				{
